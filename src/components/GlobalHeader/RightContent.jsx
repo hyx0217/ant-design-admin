@@ -1,7 +1,8 @@
 import { Tooltip, Tag, Breadcrumb } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import { RouteContext } from '@ant-design/pro-layout';
 import React from 'react';
-import { Link,withRouter } from 'umi';
+import { Link } from 'umi';
 import { connect } from 'dva';
 import globalStyles from '@/global.less'
 import Avatar from './AvatarDropdown';
@@ -14,22 +15,16 @@ const ENVTagColor = {
   test: 'green',
   pre: '#87d068',
 };
-const BreadcrumbLeft = withRouter(props => {
-  const { location } = props;
-  const breadcrumbItems = [
-    <Breadcrumb.Item key="home">
-      <Link to="/">首页</Link>
-    </Breadcrumb.Item>,
-    <Breadcrumb.Item key={location.key}>
-    <Link to={location.pathname}>{location.pathname}</Link>
-  </Breadcrumb.Item>,
-  ];
-  return (
-    <div>
-      <Breadcrumb>{breadcrumbItems}</Breadcrumb>
-    </div>
-  );
-})
+
+const breadRender=({breadcrumb})=>{
+  if(!breadcrumb.routes) return false
+  const extraBreadcrumbItems = breadcrumb.routes.map(_ => (
+      <Breadcrumb.Item key={_.path}>
+        <Link to={_.path}>{_.breadcrumbName}</Link>
+      </Breadcrumb.Item>
+    ));
+  return <Breadcrumb>{extraBreadcrumbItems}</Breadcrumb>
+}
 const GlobalHeaderRight = props => {
   const { theme, layout } = props;
   let className = styles.right;
@@ -40,7 +35,9 @@ const GlobalHeaderRight = props => {
 
   return (
     <div className={globalStyles.flex}>
-      <BreadcrumbLeft/>
+      <RouteContext.Consumer>
+        {value=>breadRender(value)}
+      </RouteContext.Consumer>
       <div className={className}>
         <HeaderSearch
           className={`${styles.action} ${styles.search}`}
